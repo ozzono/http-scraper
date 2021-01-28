@@ -1,14 +1,14 @@
-package bot_test
+package scrapper_test
 
 import (
 	"fmt"
 	"strings"
 
-	"ronoaldo.gopkg.net/bot"
+	scrapper "github.com/ozzono/http-scrapper"
 )
 
 func Example() {
-	b := bot.New()
+	b := scrapper.New()
 	page, err := b.GET("http://www.valor.com.br/valor-data/moedas")
 	if err != nil {
 		fmt.Printf("Error carregando página: %v", err)

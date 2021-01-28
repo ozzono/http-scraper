@@ -1,7 +1,7 @@
 // Copyright 2015 Ronoaldo JLP <ronoaldo@gmail.com>
 // Licensed under the Apache License, Version 2.0
 
-package bot
+package scrapper
 
 import (
 	"log"
@@ -26,11 +26,11 @@ func (r *request) setUserAgent(ua string) {
 }
 
 // transport type implements http.RoundTripper in order to allow
-// doing some magic in the Bot requests.
+// doing some magic in the Scrapper requests.
 type transport struct {
 	t  http.RoundTripper
 	ua string
-	b  *Bot
+	b  *Scrapper
 }
 
 func (t *transport) userAgent() string {

@@ -1,4 +1,4 @@
-package bot
+package scrapper
 
 import (
 	"encoding/json"
@@ -12,8 +12,8 @@ type CookieJar struct {
 	Data map[string][]*http.Cookie
 }
 
-func (bot *Bot) EncodeCookies() ([]byte, error) {
-	history := bot.History().Entries()
+func (scrapper *Scrapper) EncodeCookies() ([]byte, error) {
+	history := scrapper.History().Entries()
 	jar := &CookieJar{
 		Data: make(map[string][]*http.Cookie),
 	}
@@ -23,12 +23,12 @@ func (bot *Bot) EncodeCookies() ([]byte, error) {
 			log.Printf("Invalid URL in history! Skipping cookies from it: " + history[i])
 			continue
 		}
-		jar.Data[u.String()] = bot.j.Cookies(u)
+		jar.Data[u.String()] = scrapper.j.Cookies(u)
 	}
 	return json.MarshalIndent(jar, "", "  ")
 }
 
-func (bot *Bot) DecodeCookies(cookies []byte) error {
+func (scrapper *Scrapper) DecodeCookies(cookies []byte) error {
 	jar := &CookieJar{
 		Data: make(map[string][]*http.Cookie),
 	}
@@ -43,22 +43,22 @@ func (bot *Bot) DecodeCookies(cookies []byte) error {
 			log.Printf("Invalid URL from cookies! Skipping: " + k)
 			continue
 		}
-		bot.j.SetCookies(u, v)
-		bot.History().Add(u.String())
+		scrapper.j.SetCookies(u, v)
+		scrapper.History().Add(u.String())
 	}
 	return nil
 }
 
-func (bot *Bot) SetCookie(c *http.Cookie) {
+func (scrapper *Scrapper) SetCookie(c *http.Cookie) {
 	var host = c.Domain
 	if strings.HasPrefix(host, ".") {
 		host = host[1:]
 	}
 	u := &url.URL{
 		Scheme: "http",
-		Host: host,
+		Host:   host,
 	}
 	log.Printf("Setting cookie: u=%v ; value=%v", u, c)
-	bot.j.SetCookies(u, []*http.Cookie{c})
-	bot.History().Add(u.String())
+	scrapper.j.SetCookies(u, []*http.Cookie{c})
+	scrapper.History().Add(u.String())
 }
