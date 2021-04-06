@@ -1,7 +1,7 @@
 // Copyright 2015 Ronoaldo JLP <ronoaldo@gmail.com>
 // Licensed under the Apache License, Version 2.0
 
-package scrapper
+package scraper
 
 import (
 	"bytes"
@@ -17,9 +17,9 @@ import (
 )
 
 var (
-	errNilPage     = fmt.Errorf("scrapper: nil page")
-	errNilResp     = fmt.Errorf("scrapper: nil response")
-	errNilRespBody = fmt.Errorf("scrapper: nil response body")
+	errNilPage     = fmt.Errorf("scraper: nil page")
+	errNilResp     = fmt.Errorf("scraper: nil response")
+	errNilRespBody = fmt.Errorf("scraper: nil response body")
 )
 
 // Form is a representation of an HTML form structure.

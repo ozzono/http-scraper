@@ -1,4 +1,4 @@
-package scrapper
+package scraper
 
 import (
 	"encoding/json"
@@ -12,8 +12,8 @@ type CookieJar struct {
 	Data map[string][]*http.Cookie
 }
 
-func (scrapper *Scrapper) EncodeCookies() ([]byte, error) {
-	history := scrapper.History().Entries()
+func (scraper *Scraper) EncodeCookies() ([]byte, error) {
+	history := scraper.History().Entries()
 	jar := &CookieJar{
 		Data: make(map[string][]*http.Cookie),
 	}
@@ -23,12 +23,12 @@ func (scrapper *Scrapper) EncodeCookies() ([]byte, error) {
 			log.Printf("Invalid URL in history! Skipping cookies from it: " + history[i])
 			continue
 		}
-		jar.Data[u.String()] = scrapper.j.Cookies(u)
+		jar.Data[u.String()] = scraper.j.Cookies(u)
 	}
 	return json.MarshalIndent(jar, "", "  ")
 }
 
-func (scrapper *Scrapper) DecodeCookies(cookies []byte) error {
+func (scraper *Scraper) DecodeCookies(cookies []byte) error {
 	jar := &CookieJar{
 		Data: make(map[string][]*http.Cookie),
 	}
@@ -43,13 +43,13 @@ func (scrapper *Scrapper) DecodeCookies(cookies []byte) error {
 			log.Printf("Invalid URL from cookies! Skipping: " + k)
 			continue
 		}
-		scrapper.j.SetCookies(u, v)
-		scrapper.History().Add(u.String())
+		scraper.j.SetCookies(u, v)
+		scraper.History().Add(u.String())
 	}
 	return nil
 }
 
-func (scrapper *Scrapper) SetCookie(c *http.Cookie) {
+func (scraper *Scraper) SetCookie(c *http.Cookie) {
 	var host = c.Domain
 	if strings.HasPrefix(host, ".") {
 		host = host[1:]
@@ -59,6 +59,6 @@ func (scrapper *Scrapper) SetCookie(c *http.Cookie) {
 		Host:   host,
 	}
 	log.Printf("Setting cookie: u=%v ; value=%v", u, c)
-	scrapper.j.SetCookies(u, []*http.Cookie{c})
-	scrapper.History().Add(u.String())
+	scraper.j.SetCookies(u, []*http.Cookie{c})
+	scraper.History().Add(u.String())
 }

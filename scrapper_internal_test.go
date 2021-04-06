@@ -1,7 +1,7 @@
 // Copyright 2015 Ronoaldo JLP <ronoaldo@gmail.com>
 // Licensed under the Apache License, Version 2.0
 
-package scrapper
+package scraper
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-func TestScrapperCookieJar(t *testing.T) {
+func TestScraperCookieJar(t *testing.T) {
 	var (
 		resp *http.Response
 		page *Page
@@ -24,8 +24,8 @@ func TestScrapperCookieJar(t *testing.T) {
 	s := httptest.NewServer(&TestServer{})
 	defer s.Close()
 
-	scrapper := New()
-	page, err = scrapper.GET(s.URL + "/private/")
+	scraper := New()
+	page, err = scraper.GET(s.URL + "/private/")
 
 	if err == nil {
 		t.Errorf("Expected forbidden error, got nil")
@@ -34,7 +34,7 @@ func TestScrapperCookieJar(t *testing.T) {
 	}
 
 	// Login and create a cookie
-	if page, err = scrapper.POST(s.URL+"/login/", make(url.Values)); err != nil {
+	if page, err = scraper.POST(s.URL+"/login/", make(url.Values)); err != nil {
 		t.Errorf("Error performing test authentication: %v", err)
 	}
 
@@ -46,7 +46,7 @@ func TestScrapperCookieJar(t *testing.T) {
 	checkBody(t, page, "OK")
 
 	// We should be able to see private data
-	if page, err = scrapper.GET(s.URL + "/private/"); err != nil {
+	if page, err = scraper.GET(s.URL + "/private/"); err != nil {
 		t.Error(err)
 	}
 

@@ -1,4 +1,4 @@
-module github.com/ozzono/http-scrapper
+module github.com/ozzono/http-scraper
 
 go 1.15
 

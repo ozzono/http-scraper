@@ -1,4 +1,4 @@
-package scrapper
+package scraper
 
 // History retains in-memory records of navigation entries.
 type History struct {

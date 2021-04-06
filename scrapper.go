@@ -1,7 +1,7 @@
 // Copyright 2015 Ronoaldo JLP <ronoaldo@gmail.com>
 // Licensed under the Apache License, Version 2.0
 
-package scrapper
+package scraper
 
 import (
 	"errors"
@@ -13,12 +13,12 @@ import (
 )
 
 var (
-	// ErrTooManyRedirects is returned when the scrapper reaches more than 10 redirects.
-	ErrTooManyRedirects = errors.New("scrapper: too many redirects")
+	// ErrTooManyRedirects is returned when the scraper reaches more than 10 redirects.
+	ErrTooManyRedirects = errors.New("scraper: too many redirects")
 )
 
-// Scrapper implements a statefull HTTP client for interacting with websites.
-type Scrapper struct {
+// Scraper implements a statefull HTTP client for interacting with websites.
+type Scraper struct {
 	b     string
 	j     *cookiejar.Jar
 	c     *http.Client
@@ -29,24 +29,24 @@ type Scrapper struct {
 	history *History
 }
 
-// New initializes a new Scrapper with an in-memory cookie management.
-func New() *Scrapper {
+// New initializes a new Scraper with an in-memory cookie management.
+func New() *Scraper {
 	return ReuseClient(http.DefaultClient)
 }
 
 // CustomNew initializes a new Bot with an in-memory cookie management and with custom http.Client.
-func CustomNew(c *http.Client) *Scrapper {
+func CustomNew(c *http.Client) *Scraper {
 	return ReuseClient(c)
 }
 
-func ReuseClient(c *http.Client) *Scrapper {
+func ReuseClient(c *http.Client) *Scraper {
 	jar, err := cookiejar.New(nil)
 	if err != nil {
 		// Currently, cookiejar.Nil never returns an error
 		panic(err)
 	}
 	c.Jar = jar
-	scrapper := &Scrapper{
+	scraper := &Scraper{
 		j:       jar,
 		c:       c,
 		history: &History{},
@@ -57,25 +57,25 @@ func ReuseClient(c *http.Client) *Scrapper {
 	}
 	t := &transport{
 		t: origTransport,
-		b: scrapper,
+		b: scraper,
 	}
-	scrapper.c.Transport = t
-	scrapper.c.CheckRedirect = scrapper.checkRedirect
-	return scrapper
+	scraper.c.Transport = t
+	scraper.c.CheckRedirect = scraper.checkRedirect
+	return scraper
 }
 
 // Do sends the HTTP request using the http.Client.Do.
 // It returns a nil page if there is a network error.
 // It will also return an error if the response is not 2xx,
 // but the returned page is non-nil, and you can parse the error body.
-func (scrapper *Scrapper) Do(req *http.Request) (*Page, error) {
-	scrapper.history.Add(scrapper.b + req.URL.String())
-	resp, err := scrapper.c.Do(req)
+func (scraper *Scraper) Do(req *http.Request) (*Page, error) {
+	scraper.history.Add(scraper.b + req.URL.String())
+	resp, err := scraper.c.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		return nil, fmt.Errorf("scrapper: non 2xx response code: %d: %s", resp.StatusCode, resp.Status)
+		return nil, fmt.Errorf("scraper: non 2xx response code: %d: %s", resp.StatusCode, resp.Status)
 	}
 	return &Page{resp: resp}, nil
 }
@@ -84,14 +84,14 @@ func (scrapper *Scrapper) Do(req *http.Request) (*Page, error) {
 // It returns a nil page if there is a network error.
 // It will also return an error if the response is not 2xx,
 // but the returned page is non-nil, and you can parse the error body.
-func (scrapper *Scrapper) GET(url string) (*Page, error) {
-	scrapper.history.Add(scrapper.b + url)
-	resp, err := scrapper.c.Get(scrapper.b + url)
+func (scraper *Scraper) GET(url string) (*Page, error) {
+	scraper.history.Add(scraper.b + url)
+	resp, err := scraper.c.Get(scraper.b + url)
 	if err != nil {
 		return nil, err
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		return nil, fmt.Errorf("scrapper: non 2xx response code: %d: %s", resp.StatusCode, resp.Status)
+		return nil, fmt.Errorf("scraper: non 2xx response code: %d: %s", resp.StatusCode, resp.Status)
 	}
 	return &Page{resp: resp}, nil
 }
@@ -101,44 +101,44 @@ func (scrapper *Scrapper) GET(url string) (*Page, error) {
 // It returns a nil page if there is a network error.
 // It will also return an error if the response is not 2xx,
 // but the returned page is non-nil, and you can parse the error body.
-func (scrapper *Scrapper) POST(url string, form url.Values) (*Page, error) {
-	scrapper.history.Add(scrapper.b + url)
-	resp, err := scrapper.c.PostForm(scrapper.b+url, form)
+func (scraper *Scraper) POST(url string, form url.Values) (*Page, error) {
+	scraper.history.Add(scraper.b + url)
+	resp, err := scraper.c.PostForm(scraper.b+url, form)
 	if err != nil {
 		return nil, err
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		return nil, fmt.Errorf("scrapper: non 2xx response code: %d: %s", resp.StatusCode, resp.Status)
+		return nil, fmt.Errorf("scraper: non 2xx response code: %d: %s", resp.StatusCode, resp.Status)
 	}
 	return &Page{resp: resp}, nil
 }
 
 // Debug enables debugging messages to standard error stream.
-func (scrapper *Scrapper) Debug(enabled bool) *Scrapper {
-	scrapper.debug = enabled
-	return scrapper
+func (scraper *Scraper) Debug(enabled bool) *Scraper {
+	scraper.debug = enabled
+	return scraper
 }
 
-// SetUA allows one to change the default user agent used by the Scrapper.
-func (scrapper *Scrapper) SetUA(userAgent string) *Scrapper {
-	scrapper.c.Transport.(*transport).ua = userAgent
-	return scrapper
+// SetUA allows one to change the default user agent used by the Scraper.
+func (scraper *Scraper) SetUA(userAgent string) *Scraper {
+	scraper.c.Transport.(*transport).ua = userAgent
+	return scraper
 }
 
-// BaseURL can be used to setup Scrapper base URL,
+// BaseURL can be used to setup Scraper base URL,
 // that will then be a prefix used by Get and Post methods.
-func (scrapper *Scrapper) BaseURL(baseURL string) *Scrapper {
-	scrapper.b = baseURL
-	return scrapper
+func (scraper *Scraper) BaseURL(baseURL string) *Scraper {
+	scraper.b = baseURL
+	return scraper
 }
 
-func (scrapper *Scrapper) History() *History {
-	return scrapper.history
+func (scraper *Scraper) History() *History {
+	return scraper.history
 }
 
-func (scrapper *Scrapper) checkRedirect(req *http.Request, via []*http.Request) error {
+func (scraper *Scraper) checkRedirect(req *http.Request, via []*http.Request) error {
 	log.Printf("Redirecting to: %v (via %v)", req, via)
-	scrapper.history.Add(req.URL.String())
+	scraper.history.Add(req.URL.String())
 	if len(via) > 10 {
 		return ErrTooManyRedirects
 	}
