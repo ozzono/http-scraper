@@ -1,15 +1,20 @@
-package scraper_test
+package main
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	scraper "github.com/ozzono/http-scraper"
 )
 
+func main() {
+	Example()
+}
+
 func Example() {
 	b := scraper.New()
-	page, err := b.GET("http://www.valor.com.br/valor-data/moedas")
+	page, err := b.GET("https://golang.org/")
 	if err != nil {
 		fmt.Printf("Error carregando página: %v", err)
 		return
@@ -19,6 +24,8 @@ func Example() {
 		fmt.Printf("Erro extraindo tabelas: %v", err)
 		return
 	}
+
+	log.Printf("len: %d", len(tables))
 
 	// Lookup the value in the extracted tables
 	if len(tables) > 0 {
